@@ -1,0 +1,21 @@
+{
+  "name": "invoice-line-totals",
+  "version": "0.1.0",
+  "description": "Compute subtotal, discount, tax, and grand total for invoice line items",
+  "type": "module",
+  "main": "dist/lineItem.js",
+  "types": "dist/lineItem.d.ts",
+  "bin": {
+    "invoice-line-totals": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
