@@ -75,4 +75,6 @@ $ cat invoice.json | node dist/cli.js
 
 ## Status
 
-Early skeleton. No test suite yet - see the roadmap for what's next.
+`src/lineItem.ts` has a unit test suite (`npm test`) covering rounding
+behavior, discount-before-tax ordering, and invoice-level aggregation.
+The CLI itself is still untested - see the roadmap for what's next.
