@@ -72,6 +72,42 @@ test("calculateLineItemTotals supports fractional quantities", () => {
   assert.equal(totals.subtotalCents, 25000);
 });
 
+test("calculateLineItemTotals supports negative quantities for credits and refunds", () => {
+  const totals = calculateLineItemTotals({
+    description: "Refund",
+    quantity: -8,
+    unitPriceCents: 15000,
+    discountPercent: 10,
+    taxRatePercent: 7.5,
+  });
+
+  assert.deepEqual(totals, {
+    subtotalCents: -120000,
+    discountCents: -12000,
+    taxableCents: -108000,
+    taxCents: -8100,
+    totalCents: -116100,
+  });
+});
+
+test("calculateLineItemTotals rounds a credit line as the exact negation of the equivalent charge", () => {
+  const charge = calculateLineItemTotals({
+    description: "Half-cent tax",
+    quantity: 1,
+    unitPriceCents: 51,
+    taxRatePercent: 50,
+  });
+  const credit = calculateLineItemTotals({
+    description: "Half-cent tax credit",
+    quantity: -1,
+    unitPriceCents: 51,
+    taxRatePercent: 50,
+  });
+
+  assert.equal(credit.taxCents, -charge.taxCents);
+  assert.equal(credit.totalCents, -charge.totalCents);
+});
+
 test("summarizeInvoice sums per-line totals across the whole invoice", () => {
   const items = [
     { description: "Consulting hours", quantity: 8, unitPriceCents: 15000, discountPercent: 10, taxRatePercent: 7.5 },

@@ -32,9 +32,15 @@ export interface InvoiceSummary {
   totalCents: number;
 }
 
-/** Round-half-up to the nearest integer cent. */
+/**
+ * Round to the nearest integer cent, half away from zero. A credit line
+ * (negative quantity) has to produce amounts that are the exact negation
+ * of the equivalent positive line - Math.round alone rounds -25.5 to -25
+ * while rounding 25.5 to 26, which would make a refund one cent short of
+ * the charge it's reversing.
+ */
 function roundCents(amount: number): number {
-  return Math.round(amount);
+  return amount < 0 ? -Math.round(-amount) : Math.round(amount);
 }
 
 export function calculateLineItemTotals(item: LineItem): LineItemTotals {

@@ -68,7 +68,7 @@ $ cat invoice.json | node dist/cli.js
 | field             | required | meaning                                      |
 |-------------------|----------|-----------------------------------------------|
 | `description`     | yes      | free text, shown as-is                        |
-| `quantity`        | yes      | may be fractional (e.g. 8.5 hours)            |
+| `quantity`        | yes      | may be fractional or negative (credits/refunds) |
 | `unitPriceCents`  | yes      | price per unit, in integer cents              |
 | `discountPercent` | no       | 0-100, applied to the line subtotal           |
 | `taxRatePercent`  | no       | 0-100, applied after the discount is taken off|
