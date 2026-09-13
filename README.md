@@ -63,6 +63,27 @@ Omit the file argument to read from stdin instead:
 $ cat invoice.json | node dist/cli.js
 ```
 
+Amounts print as plain decimal numbers (no currency symbol) by default.
+Pass `--currency` with an ISO 4217 code to get that currency's symbol and
+grouping conventions instead:
+
+```
+$ node dist/cli.js invoice.json --currency EUR
+Consulting hours
+  qty 8 x €150.00  subtotal €1,200.00  tax €81.00  total €1,161.00
+Software license
+  qty 1 x €499.00  subtotal €499.00  tax €0.00  total €499.00
+
+subtotal €1,699.00
+discount €120.00
+tax      €81.00
+total    €1,660.00
+```
+
+The library still treats every amount as integer cents no matter the
+currency, so amounts always print with two fraction digits, even for
+currencies like JPY that don't normally have a minor unit.
+
 ## Line item fields
 
 | field             | required | meaning                                      |

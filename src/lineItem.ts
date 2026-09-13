@@ -71,8 +71,34 @@ export function summarizeInvoice(items: readonly LineItem[]): InvoiceSummary {
   );
 }
 
-/** Format cents as a decimal currency string, e.g. 104999 -> "1,049.99". */
-export function formatCents(cents: number): string {
+/**
+ * Format cents as a decimal string, e.g. 104999 -> "1,049.99". Pass a
+ * currency code (ISO 4217, e.g. "EUR", "GBP") to get a symbol and the
+ * grouping/decimal conventions for that currency instead of the plain
+ * en-US number.
+ *
+ * The library always treats its input as integer cents - one hundredth of
+ * whatever unit the caller has in mind - so formatting is pinned to two
+ * fraction digits even for currencies whose own convention differs (e.g.
+ * JPY, which normally has no minor unit). That keeps every LineItem's
+ * arithmetic consistent regardless of which currency is used to display it.
+ */
+export function formatCents(cents: number, currencyCode?: string): string {
+  if (currencyCode) {
+    let formatter: Intl.NumberFormat;
+    try {
+      formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currencyCode,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    } catch {
+      throw new Error(`"${currencyCode}" is not a recognized ISO 4217 currency code`);
+    }
+    return formatter.format(cents / 100);
+  }
+
   const negative = cents < 0;
   const absolute = Math.abs(cents);
   const dollars = Math.floor(absolute / 100);

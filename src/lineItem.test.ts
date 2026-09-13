@@ -144,3 +144,18 @@ test("formatCents inserts thousands separators and two decimal places", () => {
 test("formatCents renders negative amounts with a leading minus sign", () => {
   assert.equal(formatCents(-500), "-5.00");
 });
+
+test("formatCents adds a currency symbol when a currency code is given", () => {
+  assert.equal(formatCents(104999, "EUR"), "€1,049.99");
+  assert.equal(formatCents(104999, "GBP"), "£1,049.99");
+});
+
+test("formatCents keeps two fraction digits for zero-decimal currencies", () => {
+  // JPY has no minor unit, but this library's amounts are always integer
+  // cents, so the display stays pinned to two fraction digits regardless.
+  assert.equal(formatCents(104999, "JPY"), "¥1,049.99");
+});
+
+test("formatCents rejects a currency code that isn't valid ISO 4217", () => {
+  assert.throws(() => formatCents(100, "NOTACODE"), /not a recognized ISO 4217 currency code/);
+});

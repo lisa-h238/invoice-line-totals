@@ -9,6 +9,32 @@ function readInput(path: string | undefined): string {
   return readFileSync(0, "utf8"); // fd 0 is stdin
 }
 
+interface CliArgs {
+  path?: string;
+  currency?: string;
+}
+
+function parseArgs(argv: string[]): CliArgs {
+  const args: CliArgs = {};
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--currency") {
+      const value = argv[++i];
+      if (!value) {
+        throw new Error("--currency requires a value, e.g. --currency EUR");
+      }
+      args.currency = value;
+    } else if (args.path === undefined) {
+      args.path = arg;
+    } else {
+      throw new Error(`unexpected argument: ${arg}`);
+    }
+  }
+
+  return args;
+}
+
 /** Parsing and shape-checking is the only impure, unvalidated boundary; everything past this is the pure library. */
 function parseLineItems(raw: string): LineItem[] {
   const data = JSON.parse(raw);
@@ -26,27 +52,27 @@ function parseLineItems(raw: string): LineItem[] {
   });
 }
 
-function printSummary(items: LineItem[]): void {
+function printSummary(items: LineItem[], currency: string | undefined): void {
   const summary = summarizeInvoice(items);
 
   items.forEach((item) => {
     const totals = calculateLineItemTotals(item);
     console.log(`${item.description}`);
-    console.log(`  qty ${item.quantity} x ${formatCents(item.unitPriceCents)}  subtotal ${formatCents(totals.subtotalCents)}  tax ${formatCents(totals.taxCents)}  total ${formatCents(totals.totalCents)}`);
+    console.log(`  qty ${item.quantity} x ${formatCents(item.unitPriceCents, currency)}  subtotal ${formatCents(totals.subtotalCents, currency)}  tax ${formatCents(totals.taxCents, currency)}  total ${formatCents(totals.totalCents, currency)}`);
   });
 
   console.log("");
-  console.log(`subtotal ${formatCents(summary.subtotalCents)}`);
-  console.log(`discount ${formatCents(summary.discountCents)}`);
-  console.log(`tax      ${formatCents(summary.taxCents)}`);
-  console.log(`total    ${formatCents(summary.totalCents)}`);
+  console.log(`subtotal ${formatCents(summary.subtotalCents, currency)}`);
+  console.log(`discount ${formatCents(summary.discountCents, currency)}`);
+  console.log(`tax      ${formatCents(summary.taxCents, currency)}`);
+  console.log(`total    ${formatCents(summary.totalCents, currency)}`);
 }
 
 function main(): void {
-  const path = process.argv[2];
   try {
+    const { path, currency } = parseArgs(process.argv.slice(2));
     const items = parseLineItems(readInput(path));
-    printSummary(items);
+    printSummary(items, currency);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
